@@ -8,26 +8,27 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="425.0" prefWidth="302.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GAdvancedMove">
-    <Label layoutX="111.0" layoutY="362.0" text="Steps:" />
-    <Text fx:id="txtInformation" layoutX="56.0" layoutY="110.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Index: -1 ; Coords: (-1, -1)" wrappingWidth="206.1787109375" />
+<AnchorPane prefHeight="386.0" prefWidth="302.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GAdvancedMove">
+    <Label layoutX="111.0" layoutY="342.0" text="Steps:" />
+    <Text fx:id="txtInformation" layoutX="56.0" layoutY="123.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Index: -1 ; Coords: (-1, -1)" wrappingWidth="206.1787109375" />
 
-    <TextField fx:id="txtSteps" alignment="CENTER" layoutX="156.0" layoutY="357.0" prefHeight="31.0" prefWidth="35.0" text="1" />
-    <TextField fx:id="txtHotKeyLeft" alignment="CENTER" layoutX="55.0" layoutY="260.0" prefHeight="31.0" prefWidth="56.0" />
-    <TextField fx:id="txtHotKeyRight" alignment="CENTER" layoutX="190.0" layoutY="260.0" prefHeight="31.0" prefWidth="56.0" />
-    <TextField fx:id="txtHotKeyDown" alignment="CENTER" layoutX="123.0" layoutY="297.0" prefHeight="31.0" prefWidth="56.0" />
-    <TextField fx:id="txtHotKeyUp" alignment="CENTER" layoutX="123.0" layoutY="221.0" prefHeight="31.0" prefWidth="56.0" />
-    <TextField fx:id="txtHotKeyLowerRight" alignment="CENTER" layoutX="190.0" layoutY="297.0" prefHeight="31.0" prefWidth="56.0" />
-    <TextField fx:id="txtHotKeyLowerLeft" alignment="CENTER" layoutX="55.0" layoutY="297.0" prefHeight="31.0" prefWidth="56.0" />
-    <TextField fx:id="txtHotKeyUpperRight" alignment="CENTER" layoutX="190.0" layoutY="221.0" prefHeight="31.0" prefWidth="56.0" />
-    <TextField fx:id="txtHotKeyUpperLeft" alignment="CENTER" layoutX="55.0" layoutY="221.0" prefHeight="31.0" prefWidth="56.0" />
+    <TextField fx:id="txtSteps" alignment="CENTER" layoutX="156.0" layoutY="337.0" prefHeight="31.0" prefWidth="35.0" text="1" />
+    <TextField fx:id="txtHotKeyLeft" alignment="CENTER" layoutX="56.0" layoutY="245.0" prefHeight="31.0" prefWidth="56.0" />
+    <TextField fx:id="txtHotKeyRight" alignment="CENTER" layoutX="191.0" layoutY="245.0" prefHeight="31.0" prefWidth="56.0" />
+    <TextField fx:id="txtHotKeyDown" alignment="CENTER" layoutX="124.0" layoutY="282.0" prefHeight="31.0" prefWidth="56.0" />
+    <TextField fx:id="txtHotKeyUp" alignment="CENTER" layoutX="124.0" layoutY="206.0" prefHeight="31.0" prefWidth="56.0" />
+    <TextField fx:id="txtHotKeyLowerRight" alignment="CENTER" layoutX="191.0" layoutY="282.0" prefHeight="31.0" prefWidth="56.0" />
+    <TextField fx:id="txtHotKeyLowerLeft" alignment="CENTER" layoutX="56.0" layoutY="282.0" prefHeight="31.0" prefWidth="56.0" />
+    <TextField fx:id="txtHotKeyUpperRight" alignment="CENTER" layoutX="191.0" layoutY="206.0" prefHeight="31.0" prefWidth="56.0" />
+    <TextField fx:id="txtHotKeyUpperLeft" alignment="CENTER" layoutX="56.0" layoutY="206.0" prefHeight="31.0" prefWidth="56.0" />
 
-    <RadioButton fx:id="radioButtonWalk" layoutX="21.0" layoutY="155.0" mnemonicParsing="false" text="Walk">
+    <RadioButton fx:id="radioButtonWalk" layoutX="27.0" layoutY="153.0" mnemonicParsing="false" text="Walk">
         <toggleGroup>
           <ToggleGroup fx:id="r" />
         </toggleGroup>
     </RadioButton>
-    <RadioButton fx:id="radioButtonRun" layoutX="102.0" layoutY="155.0" mnemonicParsing="false" selected="true" text="Run (Recommended)" toggleGroup="$r" />
-   <Button layoutX="56.0" layoutY="27.0" mnemonicParsing="false" onAction="#saveConfig" prefHeight="39.0" prefWidth="71.0" text="Save" />
-   <Button layoutX="167.0" layoutY="27.0" mnemonicParsing="false" onAction="#loadConfig" prefHeight="39.0" prefWidth="71.0" text="Load" />
+    <RadioButton fx:id="radioButtonRun" layoutX="108.0" layoutY="153.0" mnemonicParsing="false" selected="true" text="Run (Recommended)" toggleGroup="$r" />
+   <Button layoutX="60.0" layoutY="45.0" mnemonicParsing="false" onAction="#saveConfig" prefHeight="39.0" prefWidth="71.0" text="Save" />
+   <Button layoutX="171.0" layoutY="45.0" mnemonicParsing="false" onAction="#loadConfig" prefHeight="39.0" prefWidth="71.0" text="Load" />
+   <Label fx:id="labelState" layoutX="14.0" layoutY="14.0" prefHeight="21.0" prefWidth="130.0" text="Click in the window" textAlignment="CENTER" textFill="RED" />
 </AnchorPane>

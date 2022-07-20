@@ -5,16 +5,15 @@ import gearth.extensions.parsers.HEntityUpdate;
 import gearth.protocol.HMessage;
 import gearth.protocol.HPacket;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputControl;
+import javafx.scene.control.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
+import org.jnativehook.mouse.*;
 import java.io.*;
 import java.util.logging.LogManager;
 
@@ -35,6 +34,7 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
     public TextField txtSteps;
     public RadioButton radioButtonWalk, radioButtonRun;
     public Text txtInformation;
+    public Label labelState;
 
     // GAdvancedMove.class.getProtectionDomain().getCodeSource().getLocation().getPath();   // Obtiene la ubicacion de la clase
     TextInputControl[] txtFieldsHotKeys;
@@ -106,7 +106,46 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
             System.err.println(ex.getMessage());
             System.exit(1);
         }
-        GlobalScreen.addNativeKeyListener(this);
+        GlobalScreen.addNativeKeyListener(this);    // Register key listener
+
+        GlobalScreen.addNativeMouseListener(new NativeMouseListener() { // Register mouse listener
+            @Override
+            public void nativeMouseClicked(NativeMouseEvent nativeMouseEvent) {
+                System.out.println("Clicked");
+            }
+
+            @Override
+            public void nativeMousePressed(NativeMouseEvent nativeMouseEvent) {
+                System.out.println(nativeMouseEvent.getButton());
+                System.out.println(nativeMouseEvent.getClickCount());
+            }
+
+            @Override
+            public void nativeMouseReleased(NativeMouseEvent nativeMouseEvent) {
+                System.out.println("Released");
+            }
+        });
+
+        GlobalScreen.addNativeMouseMotionListener(new NativeMouseMotionListener() { // Register mouse motion listener
+            @Override
+            public void nativeMouseDragged(NativeMouseEvent nativeMouseEvent) {
+                System.out.println("Dragged");
+            }
+
+            @Override
+            public void nativeMouseMoved(NativeMouseEvent nativeMouseEvent) {
+                // System.out.println("coords: " + nativeMouseEvent.getX() + " " + nativeMouseEvent.getY());
+            }
+        });
+
+        GlobalScreen.addNativeMouseWheelListener(nativeMouseWheelEvent -> { // Register mouse wheel listener
+            int currentStep = Integer.parseInt(txtSteps.getText());
+            int increment = nativeMouseWheelEvent.getWheelRotation();    // -1 = up, 1 = down
+            if( (currentStep > 0) || (currentStep == 0 && increment != -1) ){
+                int result = Integer.parseInt(txtSteps.getText()) + increment;
+                Platform.runLater(() -> txtSteps.setText(String.valueOf(result)));
+            }
+        });
     }
 
     @Override
@@ -120,8 +159,8 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
     }
 
     @Override
-    protected void initExtension() {
-        // Init when you install the extension
+    protected void initExtension() { // Init when you install the extension and you are connected!
+
         txtFieldsHotKeys = new TextInputControl[]{txtHotKeyUpperRight, txtHotKeyUpperLeft, txtHotKeyUp,
                 txtHotKeyDown, txtHotKeyLeft, txtHotKeyRight, txtHotKeyLowerLeft, txtHotKeyLowerRight};
 
@@ -129,7 +168,15 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
         primaryStage.focusedProperty().addListener((observable, oldValue, newValue) -> {
             isFocused = newValue;
             if(isFocused){
-                Platform.runLater(() -> txtInformation.requestFocus()); // Le da el foco al control
+                Platform.runLater(() -> {
+                    labelState.setText("Ready for use");
+                    labelState.setTextFill(Color.GREEN);
+                    txtInformation.requestFocus(); // Le da el foco al control
+                });
+            }
+            else{
+                labelState.setTextFill(Color.RED);
+                labelState.setText("Click in the window");
             }
         });
 
@@ -200,7 +247,7 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
 
     public String notepadStructure(){
         return String.format("HotKeyUp:%s\n" + "HotKeyDown:%s\n" + "HotKeyLeft:%s\n" + "HotKeyRight:%s\n" +
-                "HotKeyUpperLeft:%s\n" + "HotKeyUpperRight:%s\n" + "HotKeyLowerLeft:%s\n" + "HotKeyLowerRight:%s"
+                        "HotKeyUpperLeft:%s\n" + "HotKeyUpperRight:%s\n" + "HotKeyLowerLeft:%s\n" + "HotKeyLowerRight:%s"
                 , txtHotKeyUp.getText(), txtHotKeyDown.getText(), txtHotKeyLeft.getText(), txtHotKeyRight.getText(),
                 txtHotKeyUpperLeft.getText(), txtHotKeyUpperRight.getText(), txtHotKeyLowerLeft.getText(), txtHotKeyLowerRight.getText());
     }
@@ -275,13 +322,4 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
             alert.show();
         }
     }
-
-    /*public void notepadexecute(String command) {
-        try {
-            Runtime.getRuntime().exec(command);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
-
 }
