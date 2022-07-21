@@ -35,6 +35,7 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
     public RadioButton radioButtonWalk, radioButtonRun;
     public Text txtInformation;
     public Label labelState;
+    public CheckBox checkAlwaysActive;
 
     // GAdvancedMove.class.getProtectionDomain().getCodeSource().getLocation().getPath();   // Obtiene la ubicacion de la clase
     TextInputControl[] txtFieldsHotKeys;
@@ -62,7 +63,7 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
                         catch (InterruptedException ignored) {}
 
                         int steps = Integer.parseInt(txtSteps.getText());
-                        if(isFocused){  // isFocused: solo si la ultima vez la ventana tuvo el foco se movera
+                        if(isFocused || checkAlwaysActive.isSelected()){  // isFocused: Si la ultima vez la ventana tuvo el foco se movera
                             if(keyTxt.equals(txtHotKeyUp.getText())){
                                 sendToServer(new HPacket("MoveAvatar", HMessage.Direction.TOSERVER, userX, userY - steps));
                             }
@@ -177,14 +178,14 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
             isFocused = newValue;
             if(isFocused){
                 Platform.runLater(() -> {
-                    labelState.setText("Ready for use");
+                    labelState.setText("Selected window");
                     labelState.setTextFill(Color.GREEN);
                     txtInformation.requestFocus(); // Le da el foco al control
                 });
             }
             else{
                 labelState.setTextFill(Color.RED);
-                labelState.setText("Click in the window");
+                labelState.setText("Unselected window");
             }
         });
 
