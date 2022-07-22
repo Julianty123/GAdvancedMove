@@ -27,11 +27,11 @@ import java.util.logging.LogManager;
 public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
     public String yourName;
     public int yourIndex = -1;
-    public int userX, userY;
+    public int userX = -1, userY = -1;
 
     public TextField txtHotKeyLeft, txtHotKeyRight, txtHotKeyUp, txtHotKeyDown,
             txtHotKeyLowerRight, txtHotKeyLowerLeft, txtHotKeyUpperRight, txtHotKeyUpperLeft;
-    public TextField txtDelay, txtSteps;
+    public TextField txtDelayKeyboard, txtDelayMouse, txtSteps;
     public RadioButton radioButtonWalk, radioButtonRun;
     public Text txtInformation;
     public Label labelState;
@@ -56,7 +56,7 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
             else if(!txtControl.isFocused()){
                 if(txtControl.getText().equals(keyTxt)){
                     new Thread(()->{
-                        try { Thread.sleep(Integer.parseInt(txtDelay.getText())); }
+                        try { Thread.sleep(Integer.parseInt(txtDelayKeyboard.getText())); }
                         catch (IllegalArgumentException illegalArgumentException) {
                             sendToClient(new HPacket("{in:Chat}{i:-1}{s:\"Negative delay doesn't exist!\"}{i:0}{i:0}{i:0}{i:0}"));
                         }
@@ -65,28 +65,28 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
                         int steps = Integer.parseInt(txtSteps.getText());
                         if(isFocused || checkAlwaysActive.isSelected()){  // isFocused: Si la ultima vez la ventana tuvo el foco se movera
                             if(keyTxt.equals(txtHotKeyUp.getText())){
-                                sendToServer(new HPacket("MoveAvatar", HMessage.Direction.TOSERVER, userX, userY - steps));
+                                sendToServer(new HPacket(String.format("{out:MoveAvatar}{i:%s}{i:%s}", userX, userY - steps)));
                             }
                             else if(keyTxt.equals(txtHotKeyDown.getText())){
-                                sendToServer(new HPacket("MoveAvatar", HMessage.Direction.TOSERVER, userX, userY + steps));
+                                sendToServer(new HPacket(String.format("{out:MoveAvatar}{i:%s}{i:%s}", userX, userY + steps)));
                             }
                             else if(keyTxt.equals(txtHotKeyLeft.getText())){
-                                sendToServer(new HPacket("MoveAvatar", HMessage.Direction.TOSERVER, userX - steps, userY));
+                                sendToServer(new HPacket(String.format("{out:MoveAvatar}{i:%s}{i:%s}", userX - steps, userY)));
                             }
                             else if(keyTxt.equals(txtHotKeyRight.getText())){
-                                sendToServer(new HPacket("MoveAvatar", HMessage.Direction.TOSERVER, userX + steps, userY));
+                                sendToServer(new HPacket(String.format("{out:MoveAvatar}{i:%s}{i:%s}", userX + steps, userY)));
                             }
                             else if(keyTxt.equals(txtHotKeyUpperRight.getText())){
-                                sendToServer(new HPacket("MoveAvatar", HMessage.Direction.TOSERVER, userX + steps, userY - steps));
+                                sendToServer(new HPacket(String.format("{out:MoveAvatar}{i:%s}{i:%s}", userX + steps, userY - steps)));
                             }
                             else if(keyTxt.equals(txtHotKeyUpperLeft.getText())){
-                                sendToServer(new HPacket("MoveAvatar", HMessage.Direction.TOSERVER, userX - steps, userY - steps));
+                                sendToServer(new HPacket(String.format("{out:MoveAvatar}{i:%s}{i:%s}", userX - steps, userY - steps)));
                             }
                             else if(keyTxt.equals(txtHotKeyLowerRight.getText())){
-                                sendToServer(new HPacket("MoveAvatar", HMessage.Direction.TOSERVER, userX + steps, userY + steps));
+                                sendToServer(new HPacket(String.format("{out:MoveAvatar}{i:%s}{i:%s}", userX + steps, userY + steps)));
                             }
                             else if(keyTxt.equals(txtHotKeyLowerLeft.getText())){
-                                sendToServer(new HPacket("MoveAvatar", HMessage.Direction.TOSERVER, userX - steps, userY + steps));
+                                sendToServer(new HPacket(String.format("{out:MoveAvatar}{i:%s}{i:%s}", userX - steps, userY + steps)));
                             }
                         }
                     }).start();
@@ -169,7 +169,6 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
 
     @Override
     protected void initExtension() { // Init when you install the extension and you are connected!
-
         txtFieldsHotKeys = new TextInputControl[]{txtHotKeyUpperRight, txtHotKeyUpperLeft, txtHotKeyUp,
                 txtHotKeyDown, txtHotKeyLeft, txtHotKeyRight, txtHotKeyLowerLeft, txtHotKeyLowerRight};
 
@@ -192,21 +191,16 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
         // Detecta si la ventana esta minimizada o no
         // primaryStage.iconifiedProperty().addListener((observable, oldValue, newValue) -> {});
 
-        txtSteps.textProperty().addListener((observable, oldValue, newValue) -> {
-            try {
-                Integer.parseInt(txtSteps.getText());
-            } catch (NumberFormatException e) {
-                txtSteps.setText(oldValue);
-            }
-        });
-
-        txtDelay.textProperty().addListener((observable, oldValue, newValue) -> {
-            try {
-                Integer.parseInt(txtDelay.getText());
-            } catch (NumberFormatException e) {
-                txtDelay.setText(oldValue); // txtInformation.requestFocus();
-            }
-        });
+        TextInputControl[] txtDelayInput = new TextInputControl[]{txtDelayKeyboard, txtDelayMouse,txtSteps};
+        for(TextInputControl textInputControl : txtDelayInput){
+            textInputControl.textProperty().addListener((observable, oldValue, newValue) -> {
+                try {
+                    Integer.parseInt(textInputControl.getText());
+                } catch (NumberFormatException e) {
+                    textInputControl.setText(oldValue); // txtInformation.requestFocus();
+                }
+            });
+        }
 
         // Response of packet InfoRetrieve
         intercept(HMessage.Direction.TOCLIENT, "UserObject", hMessage -> {
@@ -221,6 +215,25 @@ public class GAdvancedMove extends ExtensionForm implements NativeKeyListener {
             if(primaryStage.isShowing() && yourIndex == -1){ // this could avoid any bug
                 yourIndex = hMessage.getPacket().readInteger();
                 txtInformation.setText(String.format("Index: %d ; Coords: (%d, %d)", yourIndex, userX, userY));
+            }
+        });
+
+        intercept(HMessage.Direction.TOSERVER, "MoveAvatar", hMessage -> {
+            if(primaryStage.isShowing()){
+                Thread threadMove = new Thread(() -> {
+                    // hMessage.setBlocked(true);
+                    try { Thread.sleep(Integer.parseInt(txtDelayMouse.getText())); } // Delay when you click in the tile
+                    catch (IllegalArgumentException illegalArgumentException) {
+                        sendToClient(new HPacket("{in:Chat}{i:-1}{s:\"Negative delay doesn't exist!\"}{i:0}{i:0}{i:0}{i:0}"));
+                    }
+                    catch (InterruptedException ignored) {}
+                });
+                threadMove.start();
+                try {threadMove.join();} catch (InterruptedException ignored) {}
+
+                /*synchronized (this) { // threadMove
+                    hMessage.setBlocked(false);
+                }*/
             }
         });
 
